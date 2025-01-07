@@ -32,9 +32,10 @@ foreach($contents as $line) {
     }
 }
 
-$correctOrders = array();  // XXX: unused
+$incorrectOrders = array();
 $sum = 0;
 
+// Part 1
 foreach($updateData as $updateRow) {
     $isCorrectRow = true;
 
@@ -50,17 +51,53 @@ foreach($updateData as $updateRow) {
     }
 
     if ($isCorrectRow) {
-        $correctOrders[] = $updateRow;
-        $middleIndex = floor(count($updateRow) / 2);
-        $sum += $updateRow[$middleIndex];
+        $sum += getMiddleEle($updateRow);
+    } else {
+        $incorrectRows[] = $updateRow;
     }
 }
-
 
 echo "<div>";
 echo "$sum";
 echo "</div>";
 
+function getMiddleEle($row) {
+    $middleIndex = floor(count($row) / 2);
+    return $row[$middleIndex];
+}
+
+// Part 2
+$fixedSum = 0;
+foreach($incorrectRows as $row) {
+    $fixedRow = fixRow($row);
+    $fixedSum += getMiddleEle($fixedRow);
+}
+
+echo "<div>";
+echo "$fixedSum";
+echo "</div>";
+
+function compareOrder($a, $b) {
+    global $orderMap;
+
+    if (property_exists($orderMap, $a)) {
+        $orderRules = $orderMap->{ $a };
+
+        if(in_array($b, $orderRules)) {
+            return -1;  // $a must come before b
+        } else {
+            return 1;
+        }
+
+    }
+
+    return 1;  // $a must come last
+}
+
+function fixRow($row) {
+    usort($row, "compareOrder");
+    return $row;
+}
 
 function isCorrectOrder($initialNum, $updatePageOrder) {
     global $orderMap;
